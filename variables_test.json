@@ -1,0 +1,9 @@
+{
+    "variables":{
+        "s3_bucket_test":"s3_bucket",
+        "produccion_test": "delop",
+        "produccion_version": 2,
+        "email":"diego198mayotester@gmail.com"
+
+    }
+}

@@ -1,0 +1,7 @@
+airflow_dag_env_py_39/
+**/*ocker*
+logs/
+**/makefile
+**/dags/__pycache__/
+plugins/
+
