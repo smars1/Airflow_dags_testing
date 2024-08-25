@@ -4,4 +4,6 @@ logs/
 **/makefile
 **/dags/__pycache__/
 plugins/
+**/prueba*
+
 
