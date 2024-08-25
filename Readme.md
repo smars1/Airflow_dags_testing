@@ -16,7 +16,13 @@ El `Dockerfile` realiza los siguientes pasos:
 3. Clona el repositorio de DAGs en `/opt/airflow/dags`.
 4. Copia `requirements.txt` al contenedor e instala las dependencias de Python.
 
-```Dockerfile
+
+
+# Clonación de la Carpeta `dags` en Docker
+
+Este documento describe cómo configurar un `Dockerfile` para clonar y utilizar solo la carpeta `dags` desde un repositorio Git en un entorno de Apache Airflow, evitando conflictos con otros archivos del repositorio.
+
+```dockerfile
 FROM apache/airflow:2.6.2
 
 # Instalar las dependencias del sistema necesarias para compilar psycopg2
@@ -39,3 +45,88 @@ COPY requirements.txt /requirements.txt
 # Instalar las dependencias de Python
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
+```
+
+## Métodos para Clonar Solo `dags`
+
+### Método 1: Clonar Todo y Copiar Solo `dags`
+
+    Este método clona todo el repositorio en un directorio temporal dentro del contenedor Docker y luego mueve solo la carpeta `dags` a la ubicación correcta en `/opt/airflow/dags`. Finalmente, se elimina el resto del repositorio para mantener el contenedor limpio.
+
+#### Dockerfile
+
+```dockerfile
+FROM apache/airflow:2.6.2
+
+# Instalar las dependencias del sistema necesarias para compilar psycopg2 y git
+USER root
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev gcc git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Cambiar a usuario airflow
+USER airflow
+
+# Clonar el repositorio de DAGs en un directorio temporal
+RUN git clone https://github.com/tu-usuario/tu-repo-dags.git /tmp/repo && \
+    mv /tmp/repo/dags/* /opt/airflow/dags/ && \
+    rm -rf /tmp/repo
+
+# Copiar el archivo de requerimientos
+COPY requirements.txt /requirements.txt
+
+# Instalar las dependencias de Python
+RUN pip install --upgrade pip
+RUN pip install -r /requirements.txt
+```
+## Explicación
+    - Clonación Temporal: El repositorio completo se clona en /tmp/repo.
+    - Mover dags: Solo los archivos de la carpeta dags se mueven a /opt/airflow/dags.
+    - Limpieza: Se elimina el resto del repositorio para mantener el contenedor limpio.
+
+# Método 2: Usar git sparse-checkout para Clonar Solo dags
+Este método utiliza git sparse-checkout para clonar directamente solo la carpeta dags, evitando así la necesidad de clonar el resto del repositorio. Requiere Git 2.25 o superior.
+
+```dockerfile
+FROM apache/airflow:2.6.2
+
+# Instalar las dependencias del sistema necesarias para compilar psycopg2 y git
+USER root
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev gcc git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Cambiar a usuario airflow
+USER airflow
+
+# Configurar sparse-checkout para clonar solo la carpeta dags
+RUN git init /opt/airflow/dags && \
+    cd /opt/airflow/dags && \
+    git remote add origin https://github.com/tu-usuario/tu-repo-dags.git && \
+    git config core.sparseCheckout true && \
+    echo "dags/*" >> /opt/airflow/dags/.git/info/sparse-checkout && \
+    git pull origin master
+
+# Copiar el archivo de requerimientos
+COPY requirements.txt /requirements.txt
+
+# Instalar las dependencias de Python
+RUN pip install --upgrade pip
+RUN pip install -r /requirements.txt
+```
+
+# Explicación
+    - Inicialización de Git: Se inicializa un repositorio vacío en /opt/airflow/dags.
+    - Configuración de Sparse-Checkout: Se configura Git para clonar solo los archivos de la carpeta dags.
+    -  Pull de dags: Se realiza un git pull para obtener solo los archivos necesarios.
+
+# Consideraciones
+    - Método 1: Es más simple y compatible, ya que clona todo el repositorio y luego mueve solo lo necesario.
+    - Método 2: Es más eficiente en cuanto a uso de espacio y tiempo de clonación, pero requiere una versión más reciente de Git.
+
+# Uso en docker-compose.yml
+No necesitas hacer cambios adicionales en tu docker-compose.yml si estás utilizando uno de estos métodos, ya que la clonación y copia están manejadas en el Dockerfile.
