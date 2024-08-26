@@ -7,14 +7,22 @@ from pymongo import MongoClient
 from airflow.utils.email import send_email_smtp
 from jinja2 import Template
 
+
+
+import os
+
+#from dotenv import load_dotenv
+#load_dotenv()
+
+user =  os.getenv("MONGO_INITDB_ROOT_USERNAME")
+password =  os.getenv("MONGO_INITDB_ROOT_PASSWORD")
+
+
 default_args = {
     'start_date': days_ago(1),
     'email_on_failure': True,
     'retries': 1,
 }
-
-user = os.getenv("MONGO_INITDB_ROOT_USERNAME")
-password = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 
 def extract_and_send_email():
     try:

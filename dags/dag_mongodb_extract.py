@@ -5,20 +5,18 @@ from pymongo import MongoClient
 import logging
 
 import os
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
+
+load_dotenv()
+
+user =  os.getenv("MONGO_INITDB_ROOT_USERNAME")
+password =  os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 
 default_args = {
     'start_date': days_ago(1),
     'email_on_failure': True,
     'retries': 1,
 }
-
-
-#load_dotenv()
-
-user =  os.getenv("MONGO_INITDB_ROOT_USERNAME")
-password =  os.getenv("MONGO_INITDB_ROOT_PASSWORD")
-
 
 def extract_data_from_mongodb():
     try:
