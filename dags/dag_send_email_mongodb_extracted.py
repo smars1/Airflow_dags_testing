@@ -78,7 +78,7 @@ def extract_and_send_email():
         logging.error("Error extracting data from MongoDB or sending email: %s", e)
         raise
 
-with DAG(dag_id='dag_mongodb_extract_and_email',
+with DAG(dag_id='dag_send_email_mongodb_extracted',
          default_args=default_args,
          schedule_interval='@daily') as dag:
     
