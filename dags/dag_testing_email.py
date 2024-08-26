@@ -58,7 +58,7 @@ def get_pandas():
         logging.error("Error connecting to the database or executing the query: %s", e)
         raise AirflowException("Failed to connect to the database or execute the query: ", e)
 
-with DAG(dag_id='dag_sendEmail_hooks',
+with DAG(dag_id='dag_testing_email',
          default_args=default_args,
          schedule_interval='@daily') as dag:
     
