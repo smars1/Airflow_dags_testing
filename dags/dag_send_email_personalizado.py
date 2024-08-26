@@ -9,7 +9,7 @@ from jinja2 import Template
 #from dotenv import load_dotenv
 
 # Cargar las variables de entorno
-#load_dotenv()
+#load_dotenv("../../../.env")
 
 user = os.getenv("MONGO_INITDB_ROOT_USERNAME")
 password = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
