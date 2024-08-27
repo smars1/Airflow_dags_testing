@@ -46,7 +46,7 @@ def send_failure_email(context):
 default_args = {
     'start_date': days_ago(1),
     'email_on_failure': False,  # Desactivado para usar la función de callback personalizada
-    'retries': 1,
+    'retries': 2,
     'retry_delay': timedelta(minutes=1),
     'on_failure_callback': send_failure_email
 }
