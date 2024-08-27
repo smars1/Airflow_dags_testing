@@ -6,5 +6,7 @@ logs/
 plugins/
 **/prueba*
 **.env
+**/LST*
+**.html
 
 
