@@ -60,7 +60,7 @@ def get_pandas():
         raise AirflowException("Failed to connect to the database or execute the query: ", e)
     
 
-with DAG(dag_id='dag_send_Email_stilo',
+with DAG(dag_id='dag_send_Email_stilo_v2',
          default_args=default_args,
          schedule_interval='@daily',
          catchup=False) as dag:
