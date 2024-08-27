@@ -9,9 +9,12 @@ from airflow.exceptions import AirflowException
 from datetime import timedelta
 from airflow.utils.email import send_email_smtp
 
-def send_failure_email(context):
-    try_number = context['task_instance'].try_number
+try_number = 0
 
+def send_failure_email(context):
+    global try_number
+    try_number+=1
+    
     # Solo enviar el correo en el primer fallo
     if try_number == 1:
 
