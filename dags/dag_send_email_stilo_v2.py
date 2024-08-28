@@ -38,7 +38,7 @@ def send_failure_email(context):
             """
 
         subject = f"Fallo en DAG: {dag_id}, Task: {task_id}"
-        to = ["diego198mayo@gmail.com", "diego198mayotester@gmail.com", "diego.pineda@factorit.com"]
+        to = ["diego198mayo@gmail.com", "diego198mayotester@gmail.com", "diego.pineda@factorit.com","luis.oliveros@factorit.com"]
         
         send_email_smtp(
             to=to,
@@ -48,7 +48,7 @@ def send_failure_email(context):
 
 default_args = {
     'start_date': days_ago(1),
-    'email_on_failure': False,  # Desactivado para usar la función de callback personalizada
+    'email_on_failure': False,  # Desactivado para usar la funcion de callback personalizada
     'retries': 2,
     'retry_delay': timedelta(minutes=1),
     'on_failure_callback': send_failure_email
