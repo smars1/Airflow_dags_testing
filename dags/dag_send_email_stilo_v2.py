@@ -9,6 +9,7 @@ from airflow.exceptions import AirflowException
 from datetime import timedelta
 from airflow.utils.email import send_email_smtp
 
+
 try_number = 0
 
 def send_failure_email(context):
@@ -38,7 +39,7 @@ def send_failure_email(context):
             """
 
         subject = f"Fallo en DAG: {dag_id}, Task: {task_id}"
-        to = ["diego198mayo@gmail.com", "diego198mayotester@gmail.com", "diego.pineda@factorit.com","luis.oliveros@factorit.com"]
+        to = ["diego198mayo@gmail.com", "diego198mayotester@gmail.com", "diego.pineda@factorit.com",]
         
         send_email_smtp(
             to=to,

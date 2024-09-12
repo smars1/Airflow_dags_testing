@@ -52,7 +52,7 @@ def send_failure_email(context):
 
     # Configuración del correo
     subject = f"Fallo en DAG: {dag_id}, Task: {task_id}"
-    to = "asaravia@entel.cl"
+    to = "diego198mayotester@gmail.com"
     
     send_email_smtp(
         to=to,

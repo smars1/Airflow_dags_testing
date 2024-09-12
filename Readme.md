@@ -1,6 +1,6 @@
 # Proyecto Airflow con Docker y Docker Compose
 
-Este proyecto utiliza Apache Airflow, Docker, y Docker Compose para orquestar un entorno de Airflow completamente funcional. Los DAGs se clonan automáticamente desde un repositorio de Git en cada despliegue.
+Este proyecto utiliza Apache Airflow, Docker, y Docker Compose para orquestar un entorno de Airflow completamente funcional. Los DAGs se clonan automaticamente desde un repositorio de Git en cada despliegue.
 
 ## Estructura del Proyecto
 
@@ -18,9 +18,9 @@ El `Dockerfile` realiza los siguientes pasos:
 
 
 
-# Clonación de la Carpeta `dags` en Docker
+# Clonacion de la Carpeta `dags` en Docker
 
-Este documento describe cómo configurar un `Dockerfile` para clonar y utilizar solo la carpeta `dags` desde un repositorio Git en un entorno de Apache Airflow, evitando conflictos con otros archivos del repositorio.
+Este documento describe como configurar un `Dockerfile` para clonar y utilizar solo la carpeta `dags` desde un repositorio Git en un entorno de Apache Airflow, evitando conflictos con otros archivos del repositorio.
 
 ```dockerfile
 FROM apache/airflow:2.6.2
@@ -51,7 +51,7 @@ RUN pip install -r /requirements.txt
 
 ### Método 1: Clonar Todo y Copiar Solo `dags`
 
-    Este método clona todo el repositorio en un directorio temporal dentro del contenedor Docker y luego mueve solo la carpeta `dags` a la ubicación correcta en `/opt/airflow/dags`. Finalmente, se elimina el resto del repositorio para mantener el contenedor limpio.
+    Este método clona todo el repositorio en un directorio temporal dentro del contenedor Docker y luego mueve solo la carpeta `dags` a la ubicacion correcta en `/opt/airflow/dags`. Finalmente, se elimina el resto del repositorio para mantener el contenedor limpio.
 
 #### Dockerfile
 
@@ -81,8 +81,8 @@ COPY requirements.txt /requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 ```
-## Explicación
-    - Clonación Temporal: El repositorio completo se clona en /tmp/repo.
+## Explicacion
+    - Clonacion Temporal: El repositorio completo se clona en /tmp/repo.
     - Mover dags: Solo los archivos de la carpeta dags se mueven a /opt/airflow/dags.
     - Limpieza: Se elimina el resto del repositorio para mantener el contenedor limpio.
 
@@ -119,14 +119,14 @@ RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 ```
 
-# Explicación
-    - Inicialización de Git: Se inicializa un repositorio vacío en /opt/airflow/dags.
-    - Configuración de Sparse-Checkout: Se configura Git para clonar solo los archivos de la carpeta dags.
+# Explicacion
+    - Inicializacion de Git: Se inicializa un repositorio vacío en /opt/airflow/dags.
+    - Configuracion de Sparse-Checkout: Se configura Git para clonar solo los archivos de la carpeta dags.
     -  Pull de dags: Se realiza un git pull para obtener solo los archivos necesarios.
 
 # Consideraciones
-    - Método 1: Es más simple y compatible, ya que clona todo el repositorio y luego mueve solo lo necesario.
-    - Método 2: Es más eficiente en cuanto a uso de espacio y tiempo de clonación, pero requiere una versión más reciente de Git.
+    - Método 1: Es mas simple y compatible, ya que clona todo el repositorio y luego mueve solo lo necesario.
+    - Método 2: Es mas eficiente en cuanto a uso de espacio y tiempo de clonacion, pero requiere una version mas reciente de Git.
 
 # Uso en docker-compose.yml
-No necesitas hacer cambios adicionales en tu docker-compose.yml si estás utilizando uno de estos métodos, ya que la clonación y copia están manejadas en el Dockerfile.
+No necesitas hacer cambios adicionales en tu docker-compose.yml si estas utilizando uno de estos métodos, ya que la clonacion y copia estan manejadas en el Dockerfile.
