@@ -94,6 +94,7 @@ def send_email_report(**kwargs):
 with DAG(dag_id='dag_send_photos_report',
          default_args=default_args,
          schedule_interval='@daily',
+         tags=['Extrating_MongoDB', "SMTP"],
          catchup=False) as dag:
 
     start = EmptyOperator(task_id='start')
@@ -101,7 +102,6 @@ with DAG(dag_id='dag_send_photos_report',
     get_photos_operator = PythonOperator(
         task_id="get_photos_operator",
         python_callable=create_pandas_df,
-        tags=['Extrating_MongoDB', "SMTP"],
         op_kwargs={'url': url}
     )
 
