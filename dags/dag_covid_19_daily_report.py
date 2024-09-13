@@ -90,6 +90,7 @@ def send_email_report(**kwargs):
 with DAG(dag_id='dag_send_covid19_daily_report',
          default_args=default_args,
          schedule_interval='@daily',
+         tags=['Extrating_From_API', "SMTP"],
          catchup=False) as dag:
 
     start = EmptyOperator(task_id='start')

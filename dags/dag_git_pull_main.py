@@ -15,6 +15,7 @@ with DAG (
     default_args=default_args,
     description='DAG para actualizar otros DAGs mediante git pull',
     schedule_interval=None, 
+    tags=["GitHub", "Control-Version"],
     catchup=False,
 ) as dag:
 
