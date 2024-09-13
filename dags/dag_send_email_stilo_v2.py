@@ -71,6 +71,7 @@ def get_pandas():
 
 with DAG(dag_id='dag_send_email_stilo_v2',
          default_args=default_args,
+         tags=["SMTP"],
          schedule_interval='@daily',
          catchup=False) as dag:
     

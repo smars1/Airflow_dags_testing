@@ -15,6 +15,7 @@ from datetime import timedelta
 import os
 
 default_args = {
+    'owner': 'Diego Atzin',
     'start_date': days_ago(1),
     'email_on_failure': False,
     'retries': 2,
@@ -100,6 +101,7 @@ with DAG(dag_id='dag_send_photos_report',
     get_photos_operator = PythonOperator(
         task_id="get_photos_operator",
         python_callable=create_pandas_df,
+        tags=['Extrating_MongoDB', "SMTP"],
         op_kwargs={'url': url}
     )
 

@@ -18,6 +18,7 @@ from datetime import timedelta
 import os
 
 default_args = {
+    'owner': 'Diego Atzin',
     'start_date': days_ago(1),
     'email_on_failure': False,
     'retries': 2,
@@ -113,6 +114,7 @@ def send_email_report(**kwargs):
 with DAG(dag_id='dag_send_photos_with_images_report',
          default_args=default_args,
          schedule_interval='@daily',
+         tags=['Extrating_MongoDB', "SMTP"],
          catchup=False) as dag:
 
     start = EmptyOperator(task_id='start')

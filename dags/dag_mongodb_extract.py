@@ -13,6 +13,7 @@ user =  os.getenv("MONGO_INITDB_ROOT_USERNAME")
 password =  os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 
 default_args = {
+    'owner': 'Diego Atzin',
     'start_date': days_ago(1),
     'email_on_failure': True,
     'retries': 1,
@@ -38,6 +39,7 @@ def extract_data_from_mongodb():
 
 with DAG(dag_id='dag_mongodb_extract',
          default_args=default_args,
+         tags=['Extrating_MongoDB'],
          schedule_interval='@daily') as dag:
     
     extract_data = PythonOperator(

@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.drawing.image import Image  # Para insertar imágenes
+from openpyxl.drawing.image import Image  # Para insertar imagenes
 from PIL import Image as PILImage, UnidentifiedImageError
 from io import BytesIO
 from airflow import DAG
@@ -15,6 +15,7 @@ from airflow.exceptions import AirflowException
 from datetime import timedelta
 
 default_args = {
+    'owner': 'Diego Atzin',
     'start_date': days_ago(1),
     'email_on_failure': False,
     'retries': 2,
@@ -24,7 +25,7 @@ default_args = {
 # URL de la API de Charmander en PokeAPI
 url = "https://pokeapi.co/api/v2/pokemon/charmander"
 
-# Función para recorrer las estructuras anidadas y extraer las URLs de imágenes
+# Funcion para recorrer las estructuras anidadas y extraer las URLs de imágenes
 def extract_sprite_urls(sprites):
     sprite_data = []
     for key, value in sprites.items():
@@ -93,7 +94,7 @@ def create_excel_report(**kwargs):
         logging.error("Error al crear el reporte de Excel: %s", e)
         raise AirflowException("Fallo al crear el reporte de Excel")
 
-# Función para enviar el correo
+# Funcion para enviar el correo
 def send_email_report(**kwargs):
     try:
         excel_path = kwargs['ti'].xcom_pull(key='excel_path', task_ids='create_excel_operator')

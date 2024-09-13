@@ -15,6 +15,7 @@ from datetime import timedelta
 import os
 
 default_args = {
+    'owner': 'Diego Atzin',
     'start_date': days_ago(1),
     'email_on_failure': False,
     'retries': 2,
