@@ -31,7 +31,7 @@ def aws_glue_etl_pipeline():
         script_location=cfg['script_location'],
         iam_role_name=cfg['iam_role_name'],
         script_args=cfg['script_args'],
-        region_name='us-west-2',  # puedes hacer cfg['region'] si es necesario convertirlo previamente
+        region_name='us-west-1',  # puedes hacer cfg['region'] si es necesario convertirlo previamente
         wait_for_completion=False
     )
 
@@ -39,7 +39,7 @@ def aws_glue_etl_pipeline():
         task_id='monitor_glue_job',
         job_name=cfg['job_name'],
         run_id=glue_run.output,
-        region_name='us-west-2',
+        region_name='us-west-1',
         verbose=True,
         poke_interval=60,
         timeout=3600
