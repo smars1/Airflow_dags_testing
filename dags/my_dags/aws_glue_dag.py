@@ -1,4 +1,3 @@
-
 from airflow.decorators import dag, task
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
 from airflow.providers.amazon.aws.sensors.glue import GlueJobSensor
@@ -18,35 +17,38 @@ def aws_glue_etl_pipeline():
         config_path = os.path.join(os.path.dirname(__file__), '../configs/glue_configs.json')
         with open(config_path) as f:
             return json.load(f)
-    
-    config = leer_config()
 
-    # Lanzar el job Glue
+    @task()
+    def lanzar_glue(config):
+        return config
+
+    config = leer_config()
+    cfg = lanzar_glue(config)
+
     glue_run = GlueJobOperator(
         task_id='launch_glue_job',
-        job_name=config['job_name'],
-        script_location=config['script_location'],
-        iam_role_name=config['iam_role_name'],
-        script_args=config['script_args'],
-        region_name=config['region'],
+        job_name=cfg['job_name'],
+        script_location=cfg['script_location'],
+        iam_role_name=cfg['iam_role_name'],
+        script_args=cfg['script_args'],
+        region_name='us-west-2',  # puedes hacer cfg['region'] si es necesario convertirlo previamente
         wait_for_completion=False
     )
 
-    # Monitorear el job Glue
     glue_sensor = GlueJobSensor(
         task_id='monitor_glue_job',
-        job_name=config['job_name'],
+        job_name=cfg['job_name'],
         run_id=glue_run.output,
-        region_name=config['region'],
+        region_name='us-west-2',
         verbose=True,
-        poke_interval=60,  # verifica cada minuto
-        timeout=3600       # timeout en una hora
+        poke_interval=60,
+        timeout=3600
     )
 
     @task
     def finalizar():
-        print(f"Glue Job {config['job_name']} finalizado correctamente.")
+        print("Glue Job finalizado correctamente.")
 
-    config >> glue_run >> glue_sensor >> finalizar()
+    config >> cfg >> glue_run >> glue_sensor >> finalizar()
 
 aws_glue_pipeline = aws_glue_etl_pipeline()
