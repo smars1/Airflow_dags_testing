@@ -5,14 +5,15 @@
 La estructura recomendada para implementar Apache Airflow integrado con AWS Glue es:
 
 ```
-📂 dags/
-├── 📂 utils/
-│   ├── airflow_templates.py
-│   └── aws_handlers.py
-├── 📂 configs/
-│   └── glue_configs.json
-└── 📂 my_dags/
-    └── aws_glue_dag.py
+📁 airflow_project_root/
+├── 📁 dags/
+│   ├── 📁 utils/
+│   │   ├── airflow_templates.py        # utilidades comunes (opcional)
+│   │   └── aws_handlers.py             # funciones auxiliares para AWS Glue (opcional)
+│   ├── 📁 configs/
+│   │   └── glue_configs.json           # configuración dinámica para AWS Glue
+│   └── 📁 my_dags/
+│       └── aws_glue_dag.py             # DAG principal que orquesta el Glue Job
 ```
 
 ## Configuración de Conexión AWS en Airflow
@@ -33,6 +34,8 @@ Para configurar la conexión AWS en Airflow:
 }
 ```
 
+> Si estás usando Airflow en MWAA o EC2 con roles IAM, puedes dejar el campo Extra vacío y AWS usará las credenciales del entorno.
+
 ## Archivo de Configuración JSON
 
 Ejemplo del archivo `glue_configs.json`:
@@ -50,16 +53,19 @@ Ejemplo del archivo `glue_configs.json`:
 }
 ```
 
-Asegúrate de reemplazar estas URLs y valores por recursos específicos de tu entorno AWS.
+Asegúrate de reemplazar estas URLs y valores por recursos específicos de tu entorno AWS:
+- `script_location`: ubicación del script ETL en S3.
+- `iam_role_name`: rol con permisos para ejecutar Glue.
+- `--extra-py-files`: librerías o dependencias adicionales (opcional).
 
 ## Descripción del Pipeline
 
-El pipeline Airflow para AWS Glue:
+Este pipeline Airflow tiene como propósito:
 
-1. Lee configuración dinámica desde un archivo JSON externo.
-2. Inicia un trabajo AWS Glue mediante `GlueJobOperator`.
-3. Monitorea el trabajo Glue usando `GlueJobSensor` hasta su finalización.
-4. Confirma y notifica la ejecución exitosa.
+1. Leer configuración dinámica desde un archivo JSON externo.
+2. Iniciar un trabajo AWS Glue mediante `GlueJobOperator`.
+3. Monitorear el trabajo Glue usando `GlueJobSensor` hasta su finalización.
+4. Confirmar y notificar la ejecución exitosa (puedes agregar notificaciones opcionalmente).
 
 ## Ejemplo de DAG AWS Glue
 
@@ -121,6 +127,7 @@ aws_glue_pipeline = aws_glue_etl_pipeline()
 - Aplica logging detallado y manejo explícito de errores.
 - Modulariza tu código para facilitar mantenimiento y escalabilidad.
 - Configura reintentos automáticos para manejar errores temporales.
+- Usa `XComs` o `TaskFlow API` para conectar tareas de forma limpia y mantenible.
 
 ---
 

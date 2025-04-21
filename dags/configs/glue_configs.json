@@ -1,0 +1,10 @@
+{
+    "job_name": "mi_job_glue",
+    "script_location": "s3://mi-bucket/scripts/etl_script.py",
+    "iam_role_name": "GlueExecutionRole",
+    "region": "us-west-2",
+    "script_args": {
+        "--extra-py-files": "s3://mi-bucket/scripts/libs.zip",
+        "--enable-metrics": ""
+    }
+}
