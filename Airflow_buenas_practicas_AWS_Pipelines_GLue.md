@@ -125,6 +125,29 @@ def aws_glue_etl_pipeline():
 aws_glue_pipeline = aws_glue_etl_pipeline()
 ```
 
+## 🛠️ Consideraciones sobre build y rebuild
+
+Cuando trabajas con Airflow en contenedores Docker, es importante entender cuándo debes usar `make build`, `make rebuild`, o simplemente actualizar tus DAGs directamente:
+
+- ✅ **Cambios en archivos Python dentro de `dags/`** (como nuevos DAGs o cambios en tus scripts): **no requieren** reconstrucción de la imagen. Estos cambios se reflejan automáticamente si `dags/` está montado como volumen.
+
+- 🔁 **`make rebuild` solo es necesario si modificas:**
+  - El `Dockerfile` (por ejemplo, agregas nuevas dependencias o cambias la base).
+  - El `docker-compose.yml` (como puertos o configuración de servicios).
+  - Archivos como `requirements.txt`.
+
+- 🧪 Si ejecutas `make rebuild` sin cambios en la imagen o configuración, parecerá que "no hace nada" porque Docker vuelve a construir una imagen idéntica.
+
+- 🔄 Puedes modificar tu `Makefile` para que `make rebuild` no solo construya, sino que también levante el entorno:
+
+```make
+rebuild:
+	docker-compose build --no-cache
+	docker-compose up -d --remove-orphans
+```
+
+---
+
 ## Buenas Prácticas
 
 - Utiliza configuraciones externas (JSON) para parametrizar pipelines.
