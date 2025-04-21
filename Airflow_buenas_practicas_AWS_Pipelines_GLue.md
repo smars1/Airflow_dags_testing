@@ -16,6 +16,10 @@ La estructura recomendada para implementar Apache Airflow integrado con AWS Glue
 │       └── aws_glue_dag.py             # DAG principal que orquesta el Glue Job
 ```
 
+> ✅ **Airflow detecta automáticamente todos los DAGs dentro del directorio `dags/`, incluyendo subcarpetas como `my_dags/`, siempre que la ruta esté correctamente configurada en `AIRFLOW_HOME` o en `airflow.cfg`.**
+
+> ✅ **Airflow detecta automáticamente todos los DAGs dentro del directorio `dags/`, incluyendo subcarpetas como `my_dags/`, siempre que la ruta esté correctamente configurada en `AIRFLOW_HOME` o en `airflow.cfg`.**
+
 ## Configuración de Conexión AWS en Airflow
 
 Para configurar la conexión AWS en Airflow:
