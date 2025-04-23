@@ -1,10 +1,8 @@
 {
-    "job_name": "mi_job_glue",
-    "script_location": "s3://mi-bucket/scripts/etl_script.py",
+    "job_name": "process_csv_to_parquet",
+    "script_location": "s3://glue-procces-storage/scripts/process_csv_to_parquet.py",   
     "iam_role_name": "GlueExecutionRole",
-    "region": "us-west-2",
+    "region": "us-east-1",
     "script_args": {
-        "--extra-py-files": "s3://mi-bucket/scripts/libs.zip",
-        "--enable-metrics": ""
     }
 }

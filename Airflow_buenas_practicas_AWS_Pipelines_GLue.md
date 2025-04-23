@@ -18,8 +18,6 @@ La estructura recomendada para implementar Apache Airflow integrado con AWS Glue
 
 > ✅ **Airflow detecta automáticamente todos los DAGs dentro del directorio `dags/`, incluyendo subcarpetas como `my_dags/`, siempre que la ruta esté correctamente configurada en `AIRFLOW_HOME` o en `airflow.cfg`.**
 
-> ✅ **Airflow detecta automáticamente todos los DAGs dentro del directorio `dags/`, incluyendo subcarpetas como `my_dags/`, siempre que la ruta esté correctamente configurada en `AIRFLOW_HOME` o en `airflow.cfg`.**
-
 ## Configuración de Conexión AWS en Airflow
 
 Para configurar la conexión AWS en Airflow:
@@ -34,7 +32,7 @@ Para configurar la conexión AWS en Airflow:
 {
   "aws_access_key_id": "TU_ACCESS_KEY",
   "aws_secret_access_key": "TU_SECRET_KEY",
-  "region_name": "us-west-2"
+  "region_name": "us-east-1"
 }
 ```
 
@@ -49,7 +47,7 @@ Ejemplo del archivo `glue_configs.json`:
     "job_name": "mi_job_glue",
     "script_location": "s3://mi-bucket/scripts/etl_script.py",
     "iam_role_name": "GlueExecutionRole",
-    "region": "us-west-2",
+    "region": "us-east-1",
     "script_args": {
         "--extra-py-files": "s3://mi-bucket/scripts/libs.zip",
         "--enable-metrics": ""
@@ -64,6 +62,23 @@ Asegúrate de reemplazar estas URLs y valores por recursos específicos de tu en
 
 ## Descripción del Pipeline
 
+Airflow sabe qué Glue Job ejecutar gracias al archivo de configuración JSON (`glue_configs.json`), donde se define explícitamente el nombre del trabajo en la clave `"job_name"`. Este valor es leído dinámicamente en el DAG mediante una tarea Python que interpreta ese archivo.
+
+```json
+{
+  "job_name": "mi_job_glue",
+  "...": "..."
+}
+```
+
+Ese `"job_name"` es luego pasado al operador `GlueJobOperator` dentro del DAG:
+
+```python
+job_name=config["job_name"]
+```
+
+Así se indica directamente a Airflow cuál es el Glue Job que debe lanzar en cada ejecución.
+
 Este pipeline Airflow tiene como propósito:
 
 1. Leer configuración dinámica desde un archivo JSON externo.
@@ -73,14 +88,9 @@ Este pipeline Airflow tiene como propósito:
 
 ## Ejemplo de DAG AWS Glue
 
-```python
-from airflow.decorators import dag, task
-from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
-from airflow.providers.amazon.aws.sensors.glue import GlueJobSensor
-from datetime import datetime
-import json
-import os
+> ⚠️ Asegúrate de que el valor de `region` en el archivo JSON sea un **string válido**, por ejemplo `"us-west-2"`. El error `expected string or bytes-like object` ocurre si el valor no es una cadena correctamente definida.
 
+```python
 @dag(
     schedule_interval=None,
     start_date=datetime(2024, 1, 1),
@@ -90,27 +100,41 @@ import os
 def aws_glue_etl_pipeline():
     @task(multiple_outputs=True)
     def leer_config():
+        # Validacion temprana del JSON
+        def validar_configuracion(cfg):
+            claves = ["job_name", "script_location", "iam_role_name", "region"]
+            for clave in claves:
+                if not isinstance(cfg.get(clave), str):
+                    raise ValueError(f"La clave '{clave}' debe ser un string y no lo es: {cfg.get(clave)}")
+            return True
         config_path = os.path.join(os.path.dirname(__file__), '../configs/glue_configs.json')
         with open(config_path) as f:
-            return json.load(f)
-    
-    config = leer_config()
+            config = json.load(f)
+        validar_configuracion(config)
+        return {
+            "job_name": config["job_name"],
+            "script_location": config["script_location"],
+            "iam_role_name": config["iam_role_name"],
+            "script_args": config["script_args"],
+            "region": config["region"]
+        }
+
+    config = leer_config()  # Esto retorna un dict con claves como 'job_name', 'region', etc.
 
     glue_run = GlueJobOperator(
         task_id='launch_glue_job',
-        job_name=config['job_name'],
-        script_location=config['script_location'],
-        iam_role_name=config['iam_role_name'],
-        script_args=config['script_args'],
-        region_name=config['region'],
+        job_name=config["job_name"],
+        script_location=config["script_location"],
+        iam_role_name=config["iam_role_name"],
+        script_args=config["script_args"],
+        region_name=config["region"],
         wait_for_completion=False
     )
 
     glue_sensor = GlueJobSensor(
         task_id='monitor_glue_job',
-        job_name=config['job_name'],
+        job_name=config["job_name"],
         run_id=glue_run.output,
-        region_name=config['region'],
         verbose=True,
         poke_interval=60,
         timeout=3600
@@ -118,7 +142,7 @@ def aws_glue_etl_pipeline():
 
     @task
     def finalizar():
-        print(f"Glue Job {config['job_name']} finalizado correctamente.")
+        print("Glue Job finalizado correctamente.")
 
     config >> glue_run >> glue_sensor >> finalizar()
 

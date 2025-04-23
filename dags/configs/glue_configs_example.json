@@ -1,0 +1,21 @@
+{
+    "job_name": "process_csv_to_parquet",
+    "script_location": "s3://glue-procces-storage/scripts/process_csv_to_parquet.py",   
+    "iam_role_name": "GlueExecutionRole",
+    "region": "us-east-1",
+    "script_args": {
+    "--INPUT_PATH": "s3://mi-bucket/input/archivo.csv",
+    "--OUTPUT_PATH": "s3://mi-bucket/output/",
+    "--extra-py-files": "s3://mi-bucket/scripts/libs.zip",
+    "--enable-metrics": ""
+},
+    "glue_version": "3.0",
+    "max_capacity": 10,
+    "worker_type": "G.1X",
+    "number_of_workers": 2,
+    "glue_job_timeout": 60,
+    "glue_job_max_retries": 1,
+    "glue_job_description": "Glue job to process CSV to Parquet",
+    "glue_job_role_arn": "arn:aws:iam::123456789012:role/GlueExecutionRole",
+    "glue_job_security_configuration": "my-security-configuration"
+}

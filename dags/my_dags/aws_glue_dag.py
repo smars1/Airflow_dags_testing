@@ -1,54 +1,47 @@
 from airflow.decorators import dag, task
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
 from airflow.providers.amazon.aws.sensors.glue import GlueJobSensor
-from datetime import datetime
+from airflow.operators.empty import EmptyOperator
+from airflow.utils.dates import days_ago
 import json
-import os
 
-@dag(
-    schedule_interval=None,
-    start_date=datetime(2024, 1, 1),
-    catchup=False,
-    tags=['aws', 'glue']
-)
+@dag(schedule_interval=None, start_date=days_ago(1), catchup=False, tags=["aws", "glue"])
 def aws_glue_etl_pipeline():
-    @task(multiple_outputs=True)
+
+    @task()
     def leer_config():
-        config_path = os.path.join(os.path.dirname(__file__), '../configs/glue_configs.json')
-        with open(config_path) as f:
+        with open('/opt/airflow/dags/configs/glue_configs.json') as f:
             return json.load(f)
 
     @task()
-    def lanzar_glue(config):
-        return config
+    def ejecutar_glue(config: dict) -> str:
+        job = GlueJobOperator(
+            task_id='ejecutar_glue',
+            job_name=config['job_name'],
+            script_location=config['script_location'],
+            iam_role_name=config['iam_role_name'],
+            region_name=config['region'],
+            script_args=config['script_args'],
+            aws_conn_id='aws_default',
+            wait_for_completion=False
+        )
+        return job.execute({})  # Retorna el run_id
 
     config = leer_config()
-    cfg = lanzar_glue(config)
+    run_id = ejecutar_glue(config)
 
-    glue_run = GlueJobOperator(
-        task_id='launch_glue_job',
-        job_name=cfg['job_name'],
-        script_location=cfg['script_location'],
-        iam_role_name=cfg['iam_role_name'],
-        script_args=cfg['script_args'],
-        region_name='us-west-1',  # puedes hacer cfg['region'] si es necesario convertirlo previamente
-        wait_for_completion=False
+    esperar_finalizacion = GlueJobSensor(
+        task_id='esperar_finalizacion',
+        job_name="{{ ti.xcom_pull(task_ids='leer_config')['job_name'] }}",
+        run_id="{{ ti.xcom_pull(task_ids='ejecutar_glue') }}",
+        aws_conn_id='aws_default',
+        poke_interval=30,
+        timeout=600
     )
 
-    glue_sensor = GlueJobSensor(
-        task_id='monitor_glue_job',
-        job_name=cfg['job_name'],
-        run_id=glue_run.output,
-        region_name='us-west-1',
-        verbose=True,
-        poke_interval=60,
-        timeout=3600
-    )
+    iniciar = EmptyOperator(task_id="iniciar")
+    terminar = EmptyOperator(task_id="terminar")
 
-    @task
-    def finalizar():
-        print("Glue Job finalizado correctamente.")
+    iniciar >> config >> run_id >> esperar_finalizacion >> terminar
 
-    config >> cfg >> glue_run >> glue_sensor >> finalizar()
-
-aws_glue_pipeline = aws_glue_etl_pipeline()
+aws_glue_etl_pipeline()
