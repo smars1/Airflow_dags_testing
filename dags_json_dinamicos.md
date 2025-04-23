@@ -10,7 +10,7 @@ La estructura recomendada para implementar Apache Airflow integrado con AWS Glue
 │   ├── 📁 utils/
 │   │   ├── airflow_templates.py        # utilidades comunes (opcional)
 │   │   └── aws_handlers.py             # funciones auxiliares para AWS Glue (opcional)
-│   ├── 📁 configs/
+│   ├── 📁 templates/
 │   │   ├── glue_etl_cliente_ventas.json       # configuracion 1
 │   │   ├── glue_etl_inventario_diario.json    # configuracion 2
 │   │   └── ...                                 # se pueden agregar mas
@@ -213,4 +213,26 @@ for archivo in os.listdir(CONFIG_FOLDER):
             globals()[config_json['dag_id']] = dag
 ```
 
-> ✅ Este enfoque permite escalar facilmente. Solo debes agregar un nuevo archivo `.json` en `configs/` y Airflow levantara automaticamente un nuevo DAG a partir de la configuracion.
+---
+
+## Troubleshooting: Errores Comunes y Soluciones
+
+### ❌ Error: `Invalid type for parameter JobName, value: None`
+**Causa:** El `run_id` o `job_name` no fue recuperado correctamente del XCom.
+**Solucion:** Asegurate de que `ejecutar_glue` retorne correctamente el `run_id`.
+
+### ❌ Error: `No se encontro 'job_name' en el XCom de 'leer_config'`
+**Causa:** El DAG esta esperando una salida de un task anterior que no la retorno.
+**Solucion:** Verifica que `xcom_push=True` este habilitado y el valor se retorne correctamente.
+
+### ❌ Error: `s3://` en argumentos de Glue
+**Causa:** AWS Glue espera paths sin el prefijo `s3://`.
+**Solucion:** El script ya aplica `sanitize_script_args()` para remover el prefijo.
+
+### ❌ Error: Email no enviado
+**Causa:** Configuracion incorrecta del SMTP o falta de credenciales.
+**Solucion:** Configura la conexion SMTP en Airflow (`smtp_user`, `smtp_password`, `smtp_host`, `smtp_port`).
+
+> Puedes revisar los logs completos desde la interfaz web de Airflow → DAG → Task → Ver Logs.
+
+---
