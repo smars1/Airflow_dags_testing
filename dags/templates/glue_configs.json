@@ -1,0 +1,15 @@
+{
+    "dag_id": "aws_glue_etl_dynamic",
+    "job_name": "process_csv_to_parquet",
+    "script_location": "s3://glue-procces-storage/scripts/process_csv_to_parquet.py",
+    "iam_role_name": "GlueExecutionRole",
+    "region": "us-east-1",
+    "script_args": {
+        "--INPUT_PATH": "s3://etl-glue-csv-input/",
+        "--OUTPUT_PATH": "s3://etl-glue-csv-output/"
+    },
+    "schedule_interval": "@daily",
+    "start_date": "2024-04-05",
+    "catchup": false,
+    "email": ["diego198mayotester@gmail.com", "diego198mayo@gmail.com"]
+}
