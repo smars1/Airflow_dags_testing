@@ -1,5 +1,3 @@
-import json
-import os
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.empty import EmptyOperator
@@ -9,6 +7,19 @@ from airflow.utils.dates import days_ago
 from airflow.utils.email import send_email_smtp
 from airflow.exceptions import AirflowException
 from datetime import timedelta
+import utils.tools as tools
+
+import os
+import json
+import logging
+from airflow.utils.log.logging_mixin import LoggingMixin
+
+# Configuración del logger
+logger = LoggingMixin().log
+logger.setLevel(logging.INFO)   
+logger.info("Iniciando el script de creación de DAGs para AWS Glue") 
+
+
 
 CONFIG_FOLDER = '/opt/airflow/dags/templates/'
 
@@ -34,7 +45,14 @@ def send_failure_email(context):
     send_email_smtp(to=to, subject=subject, html_content=html_content)
 
 def sanitize_script_args(script_args: dict) -> dict:
-    keys_to_clean = ["--INPUT_PATH", "--OUTPUT_PATH"]
+    # keys_to_clean = ["--INPUT_PATH", "--OUTPUT_PATH"]
+    logging.info(f"Recibiendo script_args: {script_args}")
+    # Limpiar los argumentos de script_args
+    keys_to_clean = tools.get_key_arguments(script_args)
+
+    logging.info(f"Limpiando los siguientes argumentos: {keys_to_clean}")
+    logging.info(f"Argumentos originales: {script_args}")
+    
     for key in keys_to_clean:
         if key in script_args:
             original = script_args[key]
@@ -49,13 +67,20 @@ def validar_script_args(script_args: dict):
             raise AirflowException(f"El argumento {k} debe ser una cadena de texto. Valor recibido: {v}")
 
 def crear_dag_desde_config(config):
+    logging.info(f"Creando DAG desde la configuración: {config['dag_id']}")
+    if not config.get("dag_id"):
+        raise AirflowException("El archivo de configuración no contiene 'dag_id'")
+    
+    logging.info(f"Configuración del DAG: {config}")
     default_args = {
         "start_date": days_ago(1),
         "email_on_failure": True,
         "email": config.get("email", []),
         "on_failure_callback": send_failure_email,
         "retries": config.get("default_args", {}).get("retries", 1),
-        "retry_delay": timedelta(seconds=config.get("default_args", {}).get("retry_delay", 300))
+        "retry_delay": timedelta(seconds=config.get("default_args", {}).get("retry_delay", 10)),
+        "owner": config.get("owner", "airflow"),
+        "description": config.get("description", ""),
     }
 
     with DAG(
