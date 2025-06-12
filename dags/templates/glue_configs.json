@@ -11,5 +11,7 @@
     "schedule_interval": "@daily",
     "start_date": "2024-04-05",
     "catchup": false,
-    "email": ["diego198mayotester@gmail.com", "diego198mayo@gmail.com"]
+    "email": ["diego198mayotester@gmail.com", "diego198mayo@gmail.com"],
+    "owner": "Diego",
+    "description": "This DAG processes CSV files to Parquet format using AWS Glue."
 }
