@@ -1,0 +1,17 @@
+{
+    "dag_id": "aws_glue_paquet_to_json",
+    "job_name": "test pyspark",
+    "script_location": "s3://aws-glue-assets-<awsIdacount>-us-west-1/scripts/test.py",
+    "iam_role_name": "GlueExecutionRole",
+    "region": "us-west-1",
+    "script_args": {
+        "--bucket_input_json_path": "s3://parquet-fake-input",
+        "--json_path_cfg": "s3://test_cfg_json/glue_cfg.json"
+    },
+    "schedule_interval": "@daily",
+    "start_date": "2024-04-05",
+    "catchup": false,
+    "email": ["diego198mayotester@gmail.com", "diego198mayo@gmail.com"],
+    "owner": "Diego",
+    "description": "This DAG processes parquet files to json format using AWS Glue."
+}
